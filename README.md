@@ -10,3 +10,11 @@ posting their own creative ideas, additionally providing them a space to get fee
 • Git as a version control.
 • Trello as a project management tool.
 • Firebase as a database
+
+## Development Team: 
+• Raghad
+• Deema
+• Nouf
+• Awrad
+• Taif
+• Shuruq
