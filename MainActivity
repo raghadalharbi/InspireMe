@@ -1,0 +1,144 @@
+ackage com.example.inspaireme;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.google.firebase.auth.FirebaseAuth.getInstance;
+
+//import com.google.firebase.auth
+//import android.support.annotation.NonNull;
+//import android.support.v7.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
+    EditText PASSWORD, EMAIL;
+    Button SIGNIN, SIGNUP;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        PASSWORD = (EditText) findViewById(R.id.password);
+        EMAIL = (EditText) findViewById(R.id.email);
+        SIGNIN = (Button) findViewById(R.id.login);
+        SIGNUP = (Button) findViewById(R.id.signup);
+
+        mAuth = getInstance();
+
+        SIGNIN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((TextUtils.isEmpty(EMAIL.getText().toString())) && (TextUtils.isEmpty(PASSWORD.getText().toString()))) {
+                    Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "من فضلك تأكد من ادخال البيانات", Toast.LENGTH_SHORT).show();
+                } else if (!isEmailValid(EMAIL.getText().toString())) {
+                    Toast.makeText(getApplicationContext(), "من فضلك أدخل بريد إلكتروني صالح", Toast.LENGTH_SHORT).show();
+                } else {
+                    SignIn(EMAIL.getText().toString(), PASSWORD.getText().toString());
+                }
+            }
+        });
+
+        SIGNUP.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((TextUtils.isEmpty(EMAIL.getText().toString())) || (TextUtils.isEmpty(PASSWORD.getText().toString()))) {
+                    Toast.makeText(getApplicationContext(), "من فضلك تأكد من ادخال البيانات", Toast.LENGTH_SHORT).show();
+                } else if (!isEmailValid(EMAIL.getText().toString())) {
+                    Toast.makeText(getApplicationContext(), "من فضلك أدخل بريد إلكتروني صالح", Toast.LENGTH_SHORT).show();
+                } else if (PASSWORD.getText().toString().length() < 6) {
+                    Toast.makeText(getApplicationContext(), "رجاءاً اختر كلمة المرور بعناية", Toast.LENGTH_SHORT).show();
+                } else {
+                    createAccount(EMAIL.getText().toString(), PASSWORD.getText().toString());
+                }
+            }
+        });
+    }
+
+    public static boolean isEmailValid(String email) {
+        boolean isValid = false;
+
+         String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+        CharSequence inputStr = email;
+
+        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(inputStr);
+        if (matcher.matches()) {
+            isValid = true;
+        }
+        return isValid;
+    }
+    private void createAccount(String email, String password) {
+        Task<com.google.firebase.auth.AuthResult> تم_التسجيل_بنجاح = mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "تم التسجيل بنجاح",
+                                    Toast.LENGTH_SHORT).show();
+                         //   SIGNUP.setVisibility(View.GONE);
+
+                            FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+                            Intent intent =new Intent(MainActivity.this, Name.class);
+                            intent.putExtra("UID", currentFirebaseUser.getUid());
+
+                            startActivity(intent);
+                        }
+                    }
+                });
+    }
+    private void SignIn(String email, String password) {
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                      @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+
+                            Toast.makeText(getApplicationContext(), "تم الدخول بنجاح",
+                                    Toast.LENGTH_SHORT).show();
+
+                            FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+                            Intent intent =new Intent(MainActivity.this, Main.class);
+                            intent.putExtra("UID", currentFirebaseUser.getUid());
+
+                            startActivity(intent);
+
+                            finish();
+                        }else {
+                            Toast.makeText(getApplicationContext(), "يوجد خطأ في المعلومات التي تم تقديمها",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+    }
+    @Override
+    public void onBackPressed() {
+
+    }
+
+
+
+}
